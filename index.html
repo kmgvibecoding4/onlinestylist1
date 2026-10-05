@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Капсула — онлайн-стилист</title>
+<meta name="description" content="Персональная капсула гардероба: палитра по цветотипу, вещи, готовые образы и список покупок.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Prata&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2;--surface:#ffffff;--ink:#241f1c;--muted:#6e655e;--line:#e6ded4;
+  --accent:#b5532d;--accent-ink:#ffffff;--soft:#f1ebe2;--danger:#b3261e;
+  --serif:'Prata',Georgia,serif;--sans:'Onest',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#17140f;--surface:#211d17;--ink:#f1ebe2;--muted:#a89f94;--line:#383128;--soft:#2a251d;--danger:#f2b8b5}
+}
+:root[data-theme="dark"]{--bg:#17140f;--surface:#211d17;--ink:#f1ebe2;--muted:#a89f94;--line:#383128;--soft:#2a251d;--danger:#f2b8b5}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.15;margin:0}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header.hero{padding:40px 0 28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.logo{font-family:var(--serif);font-size:22px;letter-spacing:.02em}
+.theme{background:none;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:6px 14px;cursor:pointer;font:inherit;font-size:14px}
+.hero h1{font-size:clamp(34px,7vw,60px);max-width:14ch}
+.hero p{max-width:52ch;color:var(--muted);font-size:18px;margin:16px 0 22px}
+.stripes{display:flex;height:14px;border-radius:99px;overflow:hidden;max-width:420px}
+.stripes i{flex:1;transition:background .4s}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:var(--muted)}
+.steps span{border:1px solid var(--line);border-radius:99px;padding:3px 12px}
+fieldset{border:1px solid var(--line);background:var(--surface);border-radius:16px;margin:0 0 16px;padding:22px 20px}
+legend{font-family:var(--serif);font-size:20px;padding:0 8px;margin-left:-8px}
+legend b{color:var(--accent);font-family:var(--sans);font-size:14px;margin-right:8px}
+.hint{color:var(--muted);font-size:14px;margin:4px 0 12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.chip span{display:block;padding:8px 14px;border:1px solid var(--line);border-radius:99px;background:var(--bg);font-size:15px;cursor:pointer;transition:.15s}
+.chip input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+label.f{display:block;font-size:14px;color:var(--muted)}
+label.f input,label.f select{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.season{margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ctype{display:flex;gap:10px;align-items:center}
+.ctype i{width:14px;height:14px;border-radius:50%;flex:none;display:inline-block;vertical-align:-2px;margin-right:4px}
+button.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:12px 22px;font:inherit;font-weight:500;cursor:pointer}
+button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.btn:hover{filter:brightness(1.07)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.quiz{background:var(--soft);border-radius:12px;padding:14px;margin-top:14px}
+.quiz h4{margin:12px 0 6px;font-size:15px}.quiz h4:first-child{margin-top:0}
+.msg{margin-top:10px;font-size:15px}
+.msg.err{color:var(--danger)}
+.photo-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.photo-card{border:1px dashed var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+.photo-card img{max-width:100%;max-height:220px;border-radius:8px;display:block;margin:8px 0}
+.photo-res{font-size:14px;margin-top:8px;white-space:pre-wrap}
+.submit{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 56px}
+/* results */
+#result{padding-bottom:64px}
+#result[hidden]{display:none}
+.sec{margin-top:44px}
+.sec h2{font-size:clamp(26px,4vw,34px);margin-bottom:6px}
+.sec>p.lead{color:var(--muted);margin:0 0 16px}
+.sw-group{margin-bottom:18px}
+.sw-group h3{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.sw-row{display:flex;gap:10px;flex-wrap:wrap}
+.sw{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 6px 8px;width:112px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.sw i{display:block;height:54px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}
+.sw b{display:block;font-weight:500;font-size:13px;margin-top:6px;line-height:1.2}
+.sw small{color:var(--muted);font-size:12px}
+.sw.avoid i{position:relative}
+.sw.avoid i::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(0,0,0,.55),transparent calc(50% + 1px))}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.card p{margin:0}
+.card.warn{border-color:var(--accent)}
+.cat{margin-top:18px}
+.cat h3{font-family:var(--sans);font-size:15px;font-weight:600;margin-bottom:8px}
+.items{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.item{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.item .dot{width:34px;height:34px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12)}
+.item label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:4px;cursor:pointer}
+.item .nm{font-weight:500}
+.item .tip{font-size:13px;color:var(--muted)}
+.item.have{opacity:.55}
+.progress{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+.progress div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.outfits{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.outfit{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.outfit .bar{display:flex;height:12px}.outfit .bar i{flex:1}
+.outfit .body{padding:12px 14px}
+.outfit .occ{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.outfit ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+#shop ul{list-style:none;padding:0;margin:0;columns:2 260px}
+#shop li{padding:4px 0;break-inside:avoid;display:flex;gap:8px;align-items:center}
+#shop li i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.disclaimer{margin-top:44px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{
+  body{background:#fff;color:#000}
+  header.hero,#form,.actions,.item label,.theme,.disclaimer,#sec-fig,#sec-budget,#sec-details{display:none!important}
+  .sec{margin-top:20px;break-inside:avoid-page}
+  .item,.card,.outfit,.sw{border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="topbar">
+    <div class="logo">Капсула</div>
+    <button class="theme" id="themeBtn" type="button" aria-label="Переключить тему">Тема</button>
+  </div>
+  <h1>Онлайн-стилист для вашей капсулы</h1>
+  <p>Укажите параметры и цветотип — за 3–5 минут получите палитру, перечень вещей, готовые образы и список покупок. Без регистрации, данные нигде не сохраняются.</p>
+  <div class="stripes" id="stripes" aria-hidden="true"></div>
+  <div class="steps"><span>1 · Для кого</span><span>2 · Фигура</span><span>3 · Цветотип</span><span>4 · Стиль и климат</span></div>
+</header>
+
+<form id="form" novalidate>
+  <fieldset id="step1">
+    <legend><b>Шаг 1</b>Для кого и параметры</legend>
+    <div class="row" role="radiogroup" aria-label="Для кого">
+      <label class="chip"><input type="radio" name="gender" value="f"><span>Женский</span></label>
+      <label class="chip"><input type="radio" name="gender" value="m"><span>Мужской</span></label>
+      <label class="chip"><input type="radio" name="gender" value="u"><span>Унисекс</span></label>
+    </div>
+    <div class="grid" style="margin-top:14px;max-width:300px">
+      <label class="f">Рост, см (по желанию)<input type="number" id="height" min="120" max="220" inputmode="numeric" placeholder="170"></label>
+    </div>
+  </fieldset>
+
+  <fieldset id="photoBlock" hidden>
+    <legend><b>Новое</b>Определение по фото</legend>
+    <p class="hint">Фото сжимается в браузере и отправляется только на анализ в Claude через ваш аккаунт. Мы ничего не сохраняем. Результат можно исправить вручную.</p>
+    <div class="photo-grid">
+      <div class="photo-card">
+        <strong>Лицо (для цветотипа)</strong>
+        <div class="hint">Дневной свет, без фильтров и макияжа</div>
+        <input type="file" accept="image/*" id="faceFile" aria-label="Фото лица">
+        <img id="facePrev" alt="" hidden>
+        <div class="photo-res" id="faceRes" aria-live="polite"></div>
+      </div>
+      <div class="photo-card">
+        <strong>В полный рост (для фигуры)</strong>
+        <div class="hint">Облегающая одежда, фронтально</div>
+        <input type="file" accept="image/*" id="bodyFile" aria-label="Фото в полный рост">
+        <img id="bodyPrev" alt="" hidden>
+        <div class="photo-res" id="bodyRes" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="analyzeBtn">Определить по фото</button>
+      <button type="button" class="btn ghost" id="stopBtn" hidden>Остановить анализ</button>
+      <button type="button" class="btn ghost" id="clearPhotos">Убрать фото</button>
+    </div>
+    <div class="msg" id="photoMsg" aria-live="polite"></div>
+  </fieldset>
+
+  <fieldset id="step2">
+    <legend><b>Шаг 2</b>Тип фигуры</legend>
+    <div class="row" id="figRow" role="radiogroup" aria-label="Тип фигуры"></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--muted)">Не знаю тип — определить по меркам</summary>
+      <div class="grid" style="margin-top:12px">
+        <label class="f"><span id="m1l">Грудь, см</span><input type="number" id="m1" min="40" max="200" inputmode="numeric"></label>
+        <label class="f">Талия, см<input type="number" id="m2" min="40" max="200" inputmode="numeric"></label>
+        <label class="f">Бёдра, см<input type="number" id="m3" min="50" max="220" inputmode="numeric"></label>
+      </div>
+      <div class="actions"><button type="button" class="btn ghost" id="measureBtn">Определить</button></div>
+      <div class="msg" id="measureMsg" aria-live="polite"></div>
+    </details>
+  </fieldset>
+
+  <fieldset id="step3">
+    <legend><b>Шаг 3</b>Цветотип</legend>
+    <div id="ctypes"></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--muted)">Не знаю цветотип — пройти мини-тест</summary>
+      <div class="quiz">
+        <h4>1. Подтон кожи</h4>
+        <div class="row">
+          <label class="chip"><input type="radio" name="q1" value="warm"><span>Тёплый (золотистый, персиковый)</span></label>
+          <label class="chip"><input type="radio" name="q1" value="cool"><span>Холодный (розоватый, голубоватый)</span></label>
+        </div>
+        <h4>2. Светлота (волосы, кожа, глаза в целом)</h4>
+        <div class="row">
+          <label class="chip"><input type="radio" name="q2" value="light"><span>Светлая</span></label>
+          <label class="chip"><input type="radio" name="q2" value="medium"><span>Средняя</span></label>
+          <label class="chip"><input type="radio" name="q2" value="deep"><span>Глубокая</span></label>
+        </div>
+        <h4>3. Контраст</h4>
+        <div class="row">
+          <label class="chip"><input type="radio" name="q3" value="soft"><span>Мягкая (всё приглушено)</span></label>
+          <label class="chip"><input type="radio" name="q3" value="bright"><span>Яркая (чёткие, контрастные черты)</span></label>
+        </div>
+        <div class="actions"><button type="button" class="btn ghost" id="quizBtn">Определить цветотип</button></div>
+        <div class="msg" id="quizMsg" aria-live="polite"></div>
+      </div>
+    </details>
+  </fieldset>
+
+  <fieldset id="step4">
+    <legend><b>Шаг 4</b>Стиль, поводы и климат</legend>
+    <p class="hint">Стиль — до двух вариантов</p>
+    <div class="row" id="styleRow"></div>
+    <p class="hint" style="margin-top:18px">Поводы</p>
+    <div class="row" id="occRow"></div>
+    <div class="grid" style="margin-top:18px">
+      <label class="f">Климат
+        <select id="climate"><option value="h">Жаркий</option><option value="t" selected>Умеренный</option><option value="c">Холодный</option><option value="a">Все сезоны</option></select>
+      </label>
+      <label class="f">Бюджет
+        <select id="budget"><option value="1">Экономный</option><option value="2" selected>Средний</option><option value="3">Премиальный</option></select>
+      </label>
+      <label class="f">Размер капсулы
+        <select id="size"><option value="10">10 вещей</option><option value="20" selected>20 вещей</option><option value="30">30 вещей</option></select>
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="submit">
+    <button type="submit" class="btn">Собрать капсулу</button>
+    <span class="msg err" id="formErr" role="alert"></span>
+  </div>
+</form>
+
+<main id="result" hidden></main>
+</div>
+
+<script>
+'use strict';
+/* ---------- ДАННЫЕ ---------- */
+const SEASONS={
+  spring:{n:'Весна',dark:[['#5b4636','Тёплый шоколад'],['#35546b','Морская синь']],light:[['#f7eedb','Слоновая кость'],['#e5d1ae','Песочный']],avoid:[['#000000','Чёрный'],['#8a8d96','Холодный серый'],['#6b2f5a','Холодная слива']],denim:['#5f86b0','Светлый деним'],metal:'Жёлтое золото, лёгкие позолоченные украшения',prints:'Мелкие цветочные, светлая клетка, лёгкая геометрия',fabrics:'Хлопок, лён, лёгкий трикотаж, шифон',makeup:'Персиковые румяна, коралловая или тёплая розовая помада'},
+  summer:{n:'Лето',dark:[['#4a5568','Графитовый синий'],['#6b4f5e','Сливово-серый']],light:[['#f3f1f4','Холодный белый'],['#d9dbe3','Серо-голубой']],avoid:[['#e8731a','Оранжевый'],['#c9a227','Горчичный'],['#4b3a1e','Тёплый коричневый']],denim:['#6b86aa','Мягкий деним'],metal:'Серебро, белое и розовое золото',prints:'Акварельные, тонкая полоска, мелкий цветок',fabrics:'Шёлк, тонкая шерсть, мягкий трикотаж, батист',makeup:'Холодно-розовые румяна, ягодная помада'},
+  autumn:{n:'Осень',dark:[['#4a3a2a','Горький шоколад'],['#2f4a3a','Хвойный зелёный']],light:[['#efe3c8','Кремовый'],['#cdb894','Бежевый']],avoid:[['#e8c7e0','Холодный розовый'],['#2a56c6','Электрик'],['#bfc4cf','Серебристый серый']],denim:['#3f6078','Деним'],metal:'Матовое золото, бронза, медь',prints:'Анималистичные, этнические, крупная клетка',fabrics:'Замша, твид, плотный трикотаж, лён, вельвет',makeup:'Терракотовые румяна, кирпичная или тёплая коричневая помада'},
+  winter:{n:'Зима',dark:[['#0f1226','Чернильный'],['#1d2b4f','Тёмный индиго']],light:[['#ffffff','Белый'],['#dfe4ee','Ледяной серый']],avoid:[['#c8a46a','Золотистый беж'],['#b5651d','Рыжий'],['#8a7a52','Оливково-хаки']],denim:['#1f2f55','Тёмный индиго'],metal:'Серебро, платина, белое золото',prints:'Контрастная геометрия, крупные графичные принты',fabrics:'Гладкая шерсть, шёлк, кожа, атлас',makeup:'Холодные розовые тона, красная помада с синим подтоном'}
+};
+const CTYPES=[
+ {id:'ls',s:'spring',n:'Светлая весна',main:[['#f0907a','Коралл'],['#8fcf9f','Мятный'],['#e9c46a','Золотистый']],acc:[['#ff9b7a','Персик'],['#5fb8b0','Бирюза'],['#e8a0b5','Тёплая роза']]},
+ {id:'ws',s:'spring',n:'Тёплая весна',main:[['#2fa38a','Зелёная бирюза'],['#f08a3c','Тыквенный'],['#8dc26f','Салатовый']],acc:[['#e5533d','Томатный'],['#f2c14e','Солнечный'],['#3f8fb8','Лазурь']]},
+ {id:'bs',s:'spring',n:'Яркая весна',main:[['#e83e4c','Алый'],['#1ea5a5','Яркая бирюза'],['#f6c026','Лимонный']],acc:[['#e4478f','Тёплая фуксия'],['#3a7bd5','Васильковый'],['#7ac943','Лайм']]},
+ {id:'lsu',s:'summer',n:'Светлое лето',main:[['#a8c3e0','Небесный'],['#e3a9c2','Пудровая роза'],['#b9a7d6','Лаванда']],acc:[['#7fb7b0','Мятно-бирюзовый'],['#d78aa6','Розовый'],['#8aa1d6','Голубая сталь']]},
+ {id:'csu',s:'summer',n:'Холодное лето',main:[['#5b7fb0','Джинсовый синий'],['#b2587a','Малиновый'],['#6f8f8a','Шалфей']],acc:[['#8e5a9b','Орхидея'],['#3f8fa0','Морская волна'],['#d06a8b','Роза']]},
+ {id:'ssu',s:'summer',n:'Мягкое лето',main:[['#8b9db0','Пыльный синий'],['#a9808e','Пыльная роза'],['#7e9a8c','Серо-зелёный']],acc:[['#b58aa8','Мальва'],['#6f8fa8','Сталь'],['#c9928f','Увядшая роза']]},
+ {id:'sa',s:'autumn',n:'Мягкая осень',main:[['#a3a96d','Светлая олива'],['#c9916a','Мягкая терракота'],['#7fa093','Хвойно-бирюзовый']],acc:[['#d4a24c','Мягкая горчица'],['#b67a6a','Пыльная терракота'],['#6f9c8c','Шалфей']]},
+ {id:'wa',s:'autumn',n:'Тёплая осень',main:[['#b5532d','Ржавый'],['#8a8d3a','Оливковый'],['#d08a2e','Янтарный']],acc:[['#c2402e','Кирпичный'],['#2f7f6f','Зелёная ель'],['#e0a526','Горчичный']]},
+ {id:'da',s:'autumn',n:'Глубокая осень',main:[['#6b2d2d','Бордо'],['#2f5d4a','Тёмный изумруд'],['#8a4b1f','Каштан']],acc:[['#b8442b','Красная медь'],['#0f6e73','Глубокий тил'],['#c58a2b','Осеннее золото']]},
+ {id:'dw',s:'winter',n:'Глубокая зима',main:[['#7a1f3d','Бургунди'],['#1f4d6b','Глубокий синий'],['#2f5d4a','Хвойный']],acc:[['#b3123f','Рубин'],['#5b2a86','Фиолетовый'],['#0f7b7b','Тил']]},
+ {id:'cw',s:'winter',n:'Холодная зима',main:[['#2a4a9a','Кобальт'],['#a1255d','Малина'],['#3a6b6b','Пихтовый']],acc:[['#c0245a','Фуксия'],['#6a3fa0','Аметист'],['#1f8ab0','Холодная бирюза']]},
+ {id:'bw',s:'winter',n:'Яркая зима',main:[['#d0103a','Красный'],['#1c4fd8','Королевский синий'],['#0a9a6a','Изумрудный']],acc:[['#e0218a','Ярко-розовый'],['#7a2fd0','Ультрафиолет'],['#00a9c9','Аква']]}
+];
+// подтон|светлота|контраст -> цветотип
+const QUIZ={
+ 'warm|light|soft':'ls','warm|light|bright':'bs','warm|medium|soft':'sa','warm|medium|bright':'ws','warm|deep|soft':'wa','warm|deep|bright':'da',
+ 'cool|light|soft':'lsu','cool|light|bright':'bw','cool|medium|soft':'ssu','cool|medium|bright':'csu','cool|deep|soft':'cw','cool|deep|bright':'dw'
+};
+const FIGS={
+ hourglass:{n:'Песочные часы',top:'Приталенные модели, V-образный и запахный вырез',bottom:'Юбки-карандаш, брюки с высокой посадкой',dress:'Платья на запах и с акцентом на талию',outer:'Приталенные пальто, пояс',avoid:'Бесформенные мешковатые силуэты, оверсайз без пояса'},
+ pear:{n:'Груша',top:'Акцент на плечах: открытые плечи, светлый и яркий верх',bottom:'Тёмные прямые и слегка расклешённые брюки, юбки А-силуэта',dress:'А-силуэт, платья с акцентом на верх',outer:'Пальто до середины бедра или ниже, с выраженной плечевой линией',avoid:'Узкие светлые брюки-скинни, карманы на бёдрах'},
+ apple:{n:'Яблоко',top:'Свободный крой с V-вырезом, ткани, не облегающие живот',bottom:'Прямые брюки со средней посадкой, юбки А-силуэта',dress:'Платья-трапеции и с завышенной линией (ампир)',outer:'Прямые пальто и длинные жакеты без пояса',avoid:'Тугие пояса на талии, облегающие трикотажные топы'},
+ rect:{n:'Прямоугольник',top:'Объём и детали: рюши, пояса, многослойность',bottom:'Брюки с защипами, юбки с объёмом',dress:'Платья с поясом, драпировкой, баской',outer:'Пальто с поясом, бомберы',avoid:'Прямые футляры без деталей, образ целиком в одном тоне без акцента'},
+ invtri:{n:'Перевёрнутый треугольник',top:'Простой неяркий верх, V-вырез, без плечевых деталей',bottom:'Объёмные, светлые и яркие низы: клёш, юбки, палаццо',dress:'Платья с пышной юбкой, А-силуэт',outer:'Пальто без выраженных плеч, реглан',avoid:'Подплечники, рюши на плечах, широкое декольте-лодочка'},
+ tri:{n:'Треугольник',top:'Структурные плечи, светлые рубашки, горизонтальные детали',bottom:'Тёмные прямые брюки',dress:'',outer:'Пиджаки с выраженным плечом, бомберы',avoid:'Облегающие брюки, карманы на бёдрах'},
+ oval:{n:'Овал',top:'Вертикальные линии, V-вырез, свободный, но не мешковатый крой',bottom:'Прямые тёмные брюки со средней посадкой',dress:'',outer:'Удлинённые пальто и пиджаки на одну пуговицу',avoid:'Узкие облегающие футболки, горизонтальные полосы на животе'},
+ mrect:{n:'Прямоугольник',top:'Слои, фактуры, структурные пиджаки',bottom:'Зауженные или прямые брюки, чиносы',dress:'',outer:'Бомберы, пиджаки, пальто',avoid:'Бесформенные мешки и полностью облегающее'},
+ trap:{n:'Трапеция',top:'Приталенные рубашки и пиджаки — подойдёт почти любой крой',bottom:'Прямые и слегка зауженные брюки',dress:'',outer:'Приталенные пальто и пиджаки',avoid:'Слишком объёмные плечи, оверсайз без формы'}
+};
+const FIGSET={f:['hourglass','pear','apple','rect','invtri'],m:['tri','oval','mrect','trap'],u:['pear','apple','rect','invtri']};
+const STYLES=[['k','Классика'],['m','Минимализм'],['c','Кэжуал'],['s','Смарт-кэжуал'],['r','Романтичный'],['p','Спортивный'],['b','Бохо']];
+const OCCS=[['w','Работа'],['c','Повседневно'],['e','Вечер'],['s','Спорт и путешествия']];
+const OCCN={w:'Работа',c:'Повседневно',e:'Вечер',s:'Спорт и путешествия'};
+const CATN={top:'Верх',bottom:'Низ',dress:'Платья',outer:'Верхняя одежда',layer:'Слои',shoes:'Обувь',acc:'Аксессуары'};
+const BUDGET={
+ 1:'Экономный: вкладывайтесь в обувь, верхнюю одежду и сумку (около 60% бюджета) — они носятся дольше всего. Базовый верх берите из массмаркета, проверяя ткань.',
+ 2:'Средний: 40% — на верхнюю одежду и обувь, 30% — на низ и слои, остальное — на базовый верх и аксессуары. Один-два акцента можно купить дешевле.',
+ 3:'Премиальный: инвестируйте в пальто, пиджак, кожаные аксессуары и трикотаж из шерсти и кашемира. Хлопковые базовые футболки можно брать проще и менять чаще.'
+};
+// name|cat|role|prio|occ|styles|climate|tip
+const CAT_RAW={
+f:`Белая рубашка|top|light|9|wcs|kmsc|htc|Прямой или свободный крой, рукава можно закатывать
+Базовая футболка|top|light|8|cs|mcp|htc|Плотный хлопок, чистая горловина
+Тонкий лонгслив|top|dark|6|wc|mcs|tc|Мягкий трикотаж, не липнет к телу
+Шёлковая блузка|top|main|7|we|krs|htc|Матовый шёлк или вискоза, лёгкая драпировка
+Водолазка|top|dark|8|wce|kms|tc|Тонкая вязка, облегающая, но не тугая
+Джемпер из шерсти|top|main|8|wc|kcsb|tc|Прямой крой, ровная кромка
+Топ на бретелях|top|accent|5|ce|rbcs|ht|Чистая линия, удобен как база под жакет
+Прямые брюки|bottom|dark|9|wes|kms|htc|Со стрелками, посадка по талии
+Джинсы прямого кроя|bottom|denim|9|cs|cmb|htc|Прямой крой, средняя посадка
+Юбка миди|bottom|main|7|wer|krsb|htc|Длина до середины икры, мягкая ткань
+Брюки палаццо|bottom|light|6|wcs|msrb|htc|Широкая нога, высокая посадка
+Чиносы|bottom|light|6|cs|csk|htc|Лёгкий хлопок, укороченная длина
+Шорты|bottom|light|6|cs|cbp|ht|Длина до середины бедра
+Спортивные брюки|bottom|dark|5|s|p|htc|Хлопок с эластаном, зауженные к низу
+Платье-рубашка|dress|main|7|wc|kscm|htc|Пояс на талии, длина миди
+Платье-футляр|dress|dark|7|we|ks|tc|Плотная ткань, без лишних деталей
+Лёгкое летнее платье|dress|accent|7|ce|rbc|ht|Струящаяся ткань, мягкая линия талии
+Вечернее платье|dress|dark|6|e|kr|htc|Простой силуэт и один акцент
+Пиджак|layer|dark|9|ws|kms|htc|Чёткая линия плеча, длина по бедро
+Кардиган|layer|light|7|wc|mcbr|tc|Тонкая вязка, можно носить расстёгнутым
+Худи|layer|main|5|cs|cp|tc|Плотный футер, без крупных логотипов
+Тренч|outer|light|9|wcs|ksm|ht|Двубортный, пояс на талии
+Классическое пальто|outer|dark|9|wce|kms|tc|Шерсть, длина до колена
+Пуховик|outer|dark|7|cs|cp|c|Лаконичный крой, лёгкий наполнитель
+Кожаная куртка|outer|dark|7|ce|cmb|t|Приталенная или укороченная
+Ветровка|outer|main|5|cs|cp|ht|Лёгкая, складывается в сумку
+Белые кроссовки|shoes|light|9|cs|mcsp|htc|Чистая кожа, минимум деталей
+Лодочки|shoes|dark|7|we|kr|htc|Устойчивый каблук 5–7 см
+Ботинки|shoes|dark|8|wc|kcb|tc|Кожа, устойчивая подошва
+Лоферы|shoes|dark|7|ws|ksm|htc|Классическая колодка
+Сандалии|shoes|light|6|ce|rbc|ht|Закрытая пятка или ремешок
+Балетки|shoes|light|5|wc|rm|ht|Острый нос, мягкая стелька
+Базовая сумка|acc|dark|8|wces|kmsc|htc|Структурная форма, вмещает формат А4
+Шарф|acc|accent|6|wc|kmcb|tc|Шерсть или кашемир, нейтральный размер
+Ремень|acc|dark|5|ws|ks|htc|Кожаный, пряжка без логотипа
+Шёлковый платок|acc|accent|5|we|krb|htc|Как шарф, повязка или лента для сумки
+Украшения|acc|accent|5|we|krb|htc|В цвет металла вашего цветотипа`,
+m:`Белая рубашка|top|light|9|wcs|kmsc|htc|Приталенный, но не тесный крой
+Рубашка оксфорд|top|main|7|wcs|ksc|htc|Плотный хлопок, воротник на пуговицах
+Базовая футболка|top|light|8|cs|mcp|htc|Плотный хлопок, ровная горловина
+Поло|top|main|6|ws c|ksc|htc|Трикотаж-пике, длина до середины бедра
+Тонкий свитер / водолазка|top|dark|8|wce|kms|tc|Тонкая вязка, без крупных логотипов
+Шерстяной джемпер|top|main|7|wc|kcs|tc|Прямой крой, круглый вырез
+Чиносы|bottom|light|8|wcs|csk|htc|Зауженный или прямой крой
+Классические брюки|bottom|dark|9|wes|kms|htc|Со стрелками, чистая длина
+Джинсы тёмные|bottom|denim|9|cs|cmb|htc|Прямой крой без потёртостей
+Шорты|bottom|light|6|cs|cp|ht|Длина до колена или чуть выше
+Спортивные брюки|bottom|dark|5|s|p|htc|Зауженные, из плотного трикотажа
+Пиджак|layer|dark|9|wes|kms|htc|Мягкая линия плеча, одна пуговица
+Кардиган|layer|light|6|wc|mcs|tc|Плотная вязка, без лишнего декора
+Худи|layer|main|5|cs|cp|tc|Без крупных принтов
+Тренч|outer|light|8|wcs|ksm|ht|Длина до колена
+Классическое пальто|outer|dark|9|wce|kms|tc|Шерсть, длина до колена
+Пуховик|outer|dark|7|cs|cp|c|Лаконичный крой, лёгкий наполнитель
+Бомбер|outer|main|7|cs|cp|t|Плотная ткань, манжеты по размеру
+Ветровка|outer|main|5|cs|cp|ht|Складывается в рюкзак
+Белые кроссовки|shoes|light|9|cs|mcsp|htc|Чистая кожа, минимум деталей
+Дерби / оксфорды|shoes|dark|7|we|ks|htc|Кожа, гладкий нос
+Лоферы|shoes|dark|6|ws|ksm|htc|Мягкая колодка
+Ботинки|shoes|dark|8|wc|kcb|tc|Кожа, устойчивая подошва
+Кожаный ремень|acc|dark|6|ws|ks|htc|Цвет в тон обуви
+Сумка / рюкзак|acc|dark|8|wces|kmsc|htc|Структурная форма
+Шарф|acc|accent|5|wc|kmc|tc|Шерсть, нейтральный размер
+Часы|acc|dark|5|wes|ks|htc|Ремешок в цвет обуви`,
+u:`Базовая футболка|top|light|8|cs|mcp|htc|Плотный хлопок, прямой крой
+Белая рубашка|top|light|9|wcs|kmsc|htc|Свободный прямой крой
+Тонкий свитер / водолазка|top|dark|8|wce|kms|tc|Тонкая вязка, прямой силуэт
+Шерстяной джемпер|top|main|7|wc|kcsb|tc|Свободный крой, плотная вязка
+Худи|top|main|5|cs|cp|tc|Без крупных логотипов
+Прямые брюки|bottom|dark|9|wes|kms|htc|Прямая нога, средняя посадка
+Джинсы|bottom|denim|9|cs|cmb|htc|Прямой крой, без чрезмерных потёртостей
+Чиносы|bottom|light|6|wcs|csk|htc|Лёгкий хлопок
+Шорты|bottom|light|5|cs|cp|ht|Длина по колено
+Спортивные брюки|bottom|dark|5|s|p|htc|Свободные, с манжетой
+Пиджак|layer|dark|8|wes|kms|htc|Свободный силуэт
+Кардиган|layer|light|6|wc|mcb|tc|Плотная вязка
+Тренч|outer|light|8|wcs|ksm|ht|Свободный крой с поясом
+Пальто|outer|dark|9|wce|kms|tc|Прямой силуэт
+Пуховик|outer|dark|7|cs|cp|c|Лаконичный крой
+Ветровка|outer|main|5|cs|cp|ht|Лёгкая, складывается в сумку
+Белые кроссовки|shoes|light|9|cs|mcsp|htc|Чистая кожа
+Ботинки|shoes|dark|8|wc|kcb|tc|Устойчивая подошва
+Лоферы|shoes|dark|6|wes|ksm|htc|Классическая колодка
+Сумка|acc|dark|8|wces|kmsc|htc|Вместительная, без бросающихся логотипов
+Шарф|acc|accent|5|wc|kmc|tc|Шерсть, нейтральный размер`
+};
+const CATALOG={};
+for(const g in CAT_RAW){CATALOG[g]=CAT_RAW[g].split('\n').map(l=>{const p=l.split('|');return{name:p[0],cat:p[1],role:p[2],prio:+p[3],occ:p[4].replace(/\s/g,''),styles:p[5],clim:p[6].replace(/\s/g,''),tip:p[7]}})}
+
+/* ---------- ВСПОМОГАТЕЛЬНОЕ ---------- */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CT=id=>CTYPES.find(c=>c.id===id);
+let state={have:new Set(),capsule:null,outfits:[],ct:null,palette:null};
+
+/* ---------- ИНИЦИАЛИЗАЦИЯ ФОРМЫ ---------- */
+function chip(type,name,val,label,extra=''){return `<label class="chip"><input type="${type}" name="${name}" value="${val}" ${extra}><span>${label}</span></label>`}
+$('#styleRow').innerHTML=STYLES.map(s=>chip('checkbox','style',s[0],s[1])).join('');
+$('#occRow').innerHTML=OCCS.map(o=>chip('checkbox','occ',o[0],o[1],(o[0]==='w'||o[0]==='c')?'checked':'')).join('');
+const SORDER=['spring','summer','autumn','winter'];
+$('#ctypes').innerHTML=SORDER.map(s=>`<div class="season">${SEASONS[s].n}</div><div class="row">${CTYPES.filter(c=>c.s===s).map(c=>
+  `<label class="chip"><input type="radio" name="ct" value="${c.id}"><span class="ctype"><span><i style="background:${c.main[0][0]}"></i>${c.n}</span></span></label>`).join('')}</div>`).join('');
+
+function renderFigs(){
+  const g=($('input[name=gender]:checked')||{}).value||'f';
+  const cur=($('input[name=fig]:checked')||{}).value;
+  const set=FIGSET[g];
+  $('#figRow').innerHTML=set.map(f=>chip('radio','fig',f,FIGS[f].n,f===cur?'checked':'')).join('');
+  $('#m1l').textContent=g==='f'?'Грудь, см':'Плечи (обхват), см';
+}
+renderFigs();
+$$('input[name=gender]').forEach(i=>i.addEventListener('change',renderFigs));
+
+// ограничение выбора стилей: максимум 2
+$('#styleRow').addEventListener('change',e=>{
+  if($$('input[name=style]:checked').length>2){e.target.checked=false;$('#formErr').textContent='Можно выбрать не больше двух стилей.'}
+  else $('#formErr').textContent='';
+});
+
+// цветная шапка и акцент
+function applyColorType(id){
+  const c=CT(id); if(!c) return;
+  const s=SEASONS[c.s];
+  const cols=[s.dark[0],c.main[0],c.main[1],c.main[2],c.acc[0],c.acc[1],s.light[1]].map(x=>x[0]);
+  $('#stripes').innerHTML=cols.map(h=>`<i style="background:${h}"></i>`).join('');
+  document.documentElement.style.setProperty('--accent',c.main[0][0]);
+  // читаемость текста на акцентной кнопке
+  const lum=hex=>{const n=parseInt(hex.slice(1),16);return (.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255};
+  document.documentElement.style.setProperty('--accent-ink',lum(c.main[0][0])>.62?'#241f1c':'#ffffff');
+}
+$$('input[name=ct]').forEach(i=>i.addEventListener('change',()=>applyColorType(i.value)));
+applyColorType('ws'); // приветственная палитра
+document.documentElement.style.setProperty('--accent','#b5532d');
+$('#stripes').innerHTML=['#5b4636','#b5532d','#8a8d3a','#d08a2e','#c2402e','#2f7f6f','#cdb894'].map(h=>`<i style="background:${h}"></i>`).join('');
+document.documentElement.style.setProperty('--accent-ink','#ffffff');
+
+// тема
+$('#themeBtn').addEventListener('click',()=>{
+  const r=document.documentElement;
+  const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+
+/* ---------- МЕРКИ ---------- */
+$('#measureBtn').addEventListener('click',()=>{
+  const g=($('input[name=gender]:checked')||{}).value;
+  if(!g){$('#measureMsg').textContent='Сначала выберите, для кого (шаг 1).';return}
+  const a=+$('#m1').value,w=+$('#m2').value,h=+$('#m3').value;
+  if(!a||!w||!h){$('#measureMsg').textContent='Заполните все три мерки.';return}
+  const mx=Math.max(a,h); let id;
+  if(g==='m'||g==='u'){
+    if(g==='m'){
+      if(w>=a*0.98) id='oval';
+      else if(h>a*1.05) id='tri';
+      else if(a>w*1.15) id='trap';
+      else id='mrect';
+    }else{
+      if(h>a*1.05) id='pear'; else if(a>h*1.05) id='invtri'; else if(w>=mx*0.95) id='apple'; else id='rect';
+    }
+  }else{
+    if(Math.abs(a-h)/mx<=0.05&&w/mx<=0.75) id='hourglass';
+    else if(h>a*1.05) id='pear';
+    else if(a>h*1.05) id='invtri';
+    else if(w/mx>=0.85) id='apple';
+    else id='rect';
+  }
+  if(!FIGSET[g].includes(id)) id=g==='m'?'mrect':'rect';
+  setFig(id);
+  $('#measureMsg').textContent='Определено: '+FIGS[id].n+'. Можно изменить выше.';
+});
+function setFig(id){const el=$(`input[name=fig][value="${id}"]`);if(el){el.checked=true}}
+
+/* ---------- МИНИ-ТЕСТ ---------- */
+function ctFromAttrs(u,l,c){return QUIZ[`${u}|${l}|${c}`]}
+$('#quizBtn').addEventListener('click',()=>{
+  const v=n=>($(`input[name=${n}]:checked`)||{}).value;
+  if(!v('q1')||!v('q2')||!v('q3')){$('#quizMsg').textContent='Ответьте на все три вопроса.';return}
+  const id=ctFromAttrs(v('q1'),v('q2'),v('q3'));
+  setCt(id);
+  $('#quizMsg').textContent='Ваш цветотип: '+CT(id).n+'. Результат приблизителен — его можно изменить вручную.';
+});
+function setCt(id){const el=$(`input[name=ct][value="${id}"]`);if(el){el.checked=true;applyColorType(id)}}
+
+/* ---------- ФОТО (доступно только внутри Claude) ---------- */
+const sampler=()=>window.claude&&typeof window.claude.sample==='function'?window.claude.sample.bind(window.claude):null;
+if(sampler()) $('#photoBlock').hidden=false;
+const photos={face:null,body:null};
+let aborted=false;
+function compress(file){
+  return new Promise((res,rej)=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const k=Math.min(1,1280/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',.85));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('Неподходящий формат файла'))};
+    img.src=url;
+  });
+}
+for(const k of ['face','body']){
+  $('#'+k+'File').addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f){photos[k]=null;return}
+    try{
+      photos[k]=await compress(f);
+      const p=$('#'+k+'Prev');p.src=photos[k];p.hidden=false;
+      p.alt=k==='face'?'Загруженное фото лица':'Загруженное фото в полный рост';
+    }catch(err){$('#photoMsg').textContent=err.message;$('#photoMsg').className='msg err'}
+  });
+}
+$('#clearPhotos').addEventListener('click',()=>{
+  photos.face=photos.body=null;
+  for(const k of ['face','body']){$('#'+k+'File').value='';$('#'+k+'Prev').hidden=true;$('#'+k+'Res').textContent=''}
+  $('#photoMsg').textContent='';
+});
+$('#stopBtn').addEventListener('click',()=>{aborted=true;$('#photoMsg').textContent='Анализ остановлен.'});
+async function askModel(dataUrl,prompt){
+  const data=dataUrl.split(',')[1];
+  const r=await sampler()({messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:prompt}]}],max_tokens:600});
+  const text=typeof r==='string'?r:(r&&r.content&&r.content[0]&&r.content[0].text)||(r&&r.text)||'';
+  const m=text.match(/\{[\s\S]*\}/); if(!m) throw new Error('Модель вернула неожиданный ответ');
+  return JSON.parse(m[0]);
+}
+const CONF={low:'низкая',medium:'средняя',high:'высокая'};
+$('#analyzeBtn').addEventListener('click',async()=>{
+  const msg=$('#photoMsg'); msg.className='msg'; msg.textContent='';
+  if(!photos.face&&!photos.body){msg.textContent='Загрузите хотя бы одно фото.';msg.className='msg err';return}
+  aborted=false;$('#analyzeBtn').disabled=true;$('#stopBtn').hidden=false;msg.textContent='Анализируем…';
+  try{
+    if(photos.face){
+      const o=await askModel(photos.face,'Это фото для подбора цветотипа одежды. Оцени ТОЛЬКО цветовые признаки (цвет и светлота волос, цвет глаз, светлота и подтон кожи, контраст). Не определяй личность, возраст, вес и привлекательность. Верни только JSON: {"usable":true|false,"reason":"если непригодно — почему и как переснять","seen":"что видно на фото","undertone":"warm|cool","lightness":"light|medium|deep","contrast":"soft|bright","confidence":"low|medium|high","why":"краткое обоснование"}');
+      if(aborted) return;
+      const el=$('#faceRes');
+      if(!o.usable||!QUIZ[`${o.undertone}|${o.lightness}|${o.contrast}`]){el.textContent='Фото не подходит: '+(o.reason||'не удалось определить цвет')}
+      else{
+        const id=ctFromAttrs(o.undertone,o.lightness,o.contrast);setCt(id);
+        el.textContent=`Цветотип: ${CT(id).n}\nНа фото: ${o.seen||'—'}\n${o.why||''}\nУверенность: ${CONF[o.confidence]||'—'}`+(o.confidence==='low'?'\nУверенность низкая — проверьте результат вручную.':'');
+      }
+    }
+    if(photos.body&&!aborted){
+      const g=($('input[name=gender]:checked')||{}).value||'f';
+      const allowed=FIGSET[g].join('|');
+      const o=await askModel(photos.body,`Это фото в полный рост для подбора кроя одежды. Оцени тип фигуры ТОЛЬКО по соотношению плеч, талии и бёдер на силуэте. Не оценивай вес, размер, возраст и привлекательность. Допустимые типы: ${allowed}. Верни только JSON: {"usable":true|false,"reason":"если непригодно — почему и как переснять","seen":"что видно","figure":"${allowed}","confidence":"low|medium|high","why":"краткое обоснование"}`);
+      if(aborted) return;
+      const el=$('#bodyRes');
+      if(!o.usable||!FIGSET[g].includes(o.figure)){el.textContent='Фото не подходит: '+(o.reason||'не удалось определить фигуру')}
+      else{
+        setFig(o.figure);
+        el.textContent=`Тип фигуры: ${FIGS[o.figure].n}\nНа фото: ${o.seen||'—'}\n${o.why||''}\nУверенность: ${CONF[o.confidence]||'—'}`+(o.confidence==='low'?'\nУверенность низкая — проверьте результат вручную.':'');
+      }
+    }
+    if(!aborted) msg.textContent='Готово. Результаты подставлены в шаги 2 и 3 — их можно исправить.';
+  }catch(err){
+    msg.className='msg err';msg.textContent='Не удалось выполнить анализ: '+(err&&err.message?err.message:'ошибка или превышен лимит');
+  }finally{$('#analyzeBtn').disabled=false;$('#stopBtn').hidden=true}
+});
+
+/* ---------- ПОДБОР КАПСУЛЫ ---------- */
+function buildCapsule(p){
+  const items=CATALOG[p.gender].filter(i=>p.climate==='a'||i.clim.includes(p.climate));
+  const scored=items.map(i=>({...i,score:i.prio+(p.occ.some(o=>i.occ.includes(o))?3:0)+(p.styles.filter(s=>i.styles.includes(s)).length*2)}));
+  scored.sort((a,b)=>b.score-a.score);
+  const limits={10:{top:3,bottom:2,dress:1,outer:1,layer:1,shoes:2,acc:1},20:{top:5,bottom:4,dress:2,outer:2,layer:2,shoes:3,acc:3},30:{top:7,bottom:6,dress:3,outer:3,layer:3,shoes:4,acc:4}}[p.size];
+  const chosen=[],count={};
+  const take=i=>{chosen.push(i);count[i.cat]=(count[i.cat]||0)+1};
+  for(const cat of ['top','bottom','shoes','outer']){const b=scored.find(i=>i.cat===cat&&!chosen.includes(i));if(b)take(b)}
+  for(const i of scored){
+    if(chosen.length>=p.size) break;
+    if(chosen.includes(i)||(count[i.cat]||0)>=limits[i.cat]) continue;
+    take(i);
+  }
+  // расцветка
+  const c=CT(p.ct), s=SEASONS[c.s];
+  const pal={dark:s.dark,light:s.light,main:c.main,accent:c.acc,denim:[s.denim]};
+  const idx={dark:0,light:0,main:0,accent:0,denim:0};
+  const order=['top','bottom','dress','layer','outer','shoes','acc'];
+  chosen.sort((a,b)=>order.indexOf(a.cat)-order.indexOf(b.cat)||b.score-a.score);
+  chosen.forEach((i,n)=>{
+    const list=pal[i.role];const col=list[idx[i.role]++%list.length];
+    i.color=col[0];i.colorName=col[1];i.id=n;
+  });
+  return chosen;
+}
+function buildOutfits(cap,p){
+  const by=(cat,o)=>cap.filter(i=>i.cat===cat&&(!o||i.occ.includes(o)));
+  const out=[]; const seen=new Set();
+  const hot=p.climate==='h';
+  const shoesFor=o=>{
+    if(o==='s') return cap.find(i=>i.cat==='shoes'&&/кроссовки/i.test(i.name))||by('shoes','s')[0]||by('shoes')[0];
+    return by('shoes',o)[0]||by('shoes')[0];
+  };
+  const perOcc=p.occ.map(o=>{
+    const list=[];
+    for(const t of by('top',o)) for(const b of by('bottom',o)){ if(t.color!==b.color) list.push([t,b]); }
+    for(const d of by('dress',o)) list.push([d]);
+    return {o,list};
+  });
+  let more=true,round=0;
+  while(more&&out.length<8){
+    more=false;
+    for(const g of perOcc){
+      if(out.length>=8) break;
+      const base=g.list[round]; if(!base) continue;
+      more=true;
+      const pieces=[...base];
+      const layer=by('layer',g.o)[0]||by('layer')[0];
+      const outer=(!hot||g.o==='w'||g.o==='e')?(by('outer',g.o)[0]||by('outer')[0]):null;
+      if(layer&&g.o!=='s'&&(g.o==='w'||g.o==='e'||round%2===0)) pieces.push(layer);
+      if(outer&&!(p.climate==='h'&&g.o==='c')&&(p.climate!=='a'||round%2===1||g.o==='w')) pieces.push(outer);
+      const sh=shoesFor(g.o); if(sh) pieces.push(sh);
+      const key=g.o+pieces.map(x=>x.id).join('.');
+      if(seen.has(key)) continue; seen.add(key);
+      out.push({occ:g.o,pieces});
+    }
+    round++; if(round>12) break;
+  }
+  return out;
+}
+
+/* ---------- ОТЧЁТ ---------- */
+function swatch(c,cls=''){return `<button type="button" class="sw ${cls}" data-hex="${c[0]}" title="Скопировать ${c[0]}"><i style="background:${c[0]}"></i><b>${esc(c[1])}</b><small>${c[0].toUpperCase()}</small></button>`}
+function render(p){
+  const c=CT(p.ct), s=SEASONS[c.s], f=FIGS[p.fig];
+  state.have=new Set();
+  const cap=buildCapsule(p); state.capsule=cap;
+  state.outfits=buildOutfits(cap,p);
+  const h=p.height;
+  let hTip='';
+  if(h&&h<=160) hTip='Рост до 160 см: выбирайте вертикальные линии, высокую посадку, образы в одном тоне и укороченные жакеты.';
+  else if(h&&h>=178) hTip='Рост от 178 см: подойдут длинные пальто, макси, оверсайз и горизонтальные линии — вы можете позволить объём.';
+  const gl={f:'женская',m:'мужская',u:'унисекс'}[p.gender];
+  const catsHtml=Object.keys(CATN).map(cat=>{
+    const list=cap.filter(i=>i.cat===cat); if(!list.length) return '';
+    return `<div class="cat"><h3>${CATN[cat]}</h3><div class="items">${list.map(i=>`
+      <div class="item" id="item${i.id}"><span class="dot" style="background:${i.color}"></span>
+      <div><div class="nm">${esc(i.name)}</div><div class="tip">${esc(i.colorName)} · ${esc(i.tip)}</div>
+      <label><input type="checkbox" data-have="${i.id}"> Уже есть</label></div></div>`).join('')}</div></div>`;
+  }).join('');
+  const outfitsHtml=state.outfits.length?state.outfits.map((o,n)=>`
+    <div class="outfit"><div class="bar">${o.pieces.map(x=>`<i style="background:${x.color}"></i>`).join('')}</div>
+    <div class="body"><div class="occ">Образ ${n+1} · ${OCCN[o.occ]}</div>
+    <ul>${o.pieces.map(x=>`<li>${esc(x.name)} — ${esc(x.colorName)}</li>`).join('')}</ul></div></div>`).join('')
+    :'<p>Для выбранных поводов не удалось составить образы — попробуйте увеличить капсулу.</p>';
+  $('#result').innerHTML=`
+  <section class="sec" id="sec-head">
+    <h2>Ваша капсула — ${esc(c.n)}</h2>
+    <p class="lead">${esc(gl[0].toUpperCase()+gl.slice(1))} капсула · ${esc(f.n)} · ${p.size} вещей${h?' · рост '+h+' см':''}</p>
+  </section>
+  <section class="sec" id="sec-pal">
+    <h2>Палитра</h2><p class="lead">Нажмите на цвет, чтобы скопировать код.</p>
+    <div class="sw-group"><h3>Нейтральные</h3><div class="sw-row">${[...s.dark,...s.light].map(x=>swatch(x)).join('')}</div></div>
+    <div class="sw-group"><h3>Основные</h3><div class="sw-row">${c.main.map(x=>swatch(x)).join('')}${swatch(s.denim)}</div></div>
+    <div class="sw-group"><h3>Акценты</h3><div class="sw-row">${c.acc.map(x=>swatch(x)).join('')}</div></div>
+    <div class="sw-group"><h3>Лучше избегать</h3><div class="sw-row">${s.avoid.map(x=>swatch(x,'avoid')).join('')}</div></div>
+  </section>
+  <section class="sec" id="sec-details">
+    <h2>Детали цветотипа</h2>
+    <div class="cards">
+      <div class="card"><h3>Металл</h3><p>${esc(s.metal)}</p></div>
+      <div class="card"><h3>Принты</h3><p>${esc(s.prints)}</p></div>
+      <div class="card"><h3>Ткани</h3><p>${esc(s.fabrics)}</p></div>
+      <div class="card"><h3>Макияж</h3><p>${esc(s.makeup)}</p></div>
+    </div>
+  </section>
+  <section class="sec" id="sec-fig">
+    <h2>Фигура: ${esc(f.n)}</h2>
+    <div class="cards">
+      <div class="card"><h3>Верх</h3><p>${esc(f.top)}</p></div>
+      <div class="card"><h3>Низ</h3><p>${esc(f.bottom)}</p></div>
+      ${f.dress&&p.gender!=='m'?`<div class="card"><h3>Платья</h3><p>${esc(f.dress)}</p></div>`:''}
+      <div class="card"><h3>Верхняя одежда</h3><p>${esc(f.outer)}</p></div>
+      <div class="card warn"><h3>Чего избегать</h3><p>${esc(f.avoid)}</p></div>
+      ${hTip?`<div class="card"><h3>С учётом роста</h3><p>${esc(hTip)}</p></div>`:''}
+    </div>
+  </section>
+  <section class="sec" id="sec-cap">
+    <h2>Капсула</h2>
+    <p class="lead">Отметьте вещи, которые у вас уже есть, — список покупок обновится.</p>
+    <div class="progress" aria-hidden="true"><div id="progBar"></div></div>
+    <div id="progTxt" class="hint" aria-live="polite"></div>
+    ${catsHtml}
+  </section>
+  <section class="sec" id="sec-out">
+    <h2>Готовые образы</h2>
+    <p class="lead">Сочетания только из вещей вашей капсулы.</p>
+    <div class="outfits">${outfitsHtml}</div>
+  </section>
+  <section class="sec" id="shop">
+    <h2>Список покупок</h2>
+    <ul id="shopList"></ul>
+    <div class="actions">
+      <button type="button" class="btn" id="copyShop">Скопировать список</button>
+      <button type="button" class="btn ghost" onclick="window.print()">Печать / PDF</button>
+      <button type="button" class="btn ghost" id="again">Изменить параметры</button>
+    </div>
+    <div class="msg" id="copyMsg" aria-live="polite"></div>
+  </section>
+  <section class="sec" id="sec-budget">
+    <h2>Бюджет</h2>
+    <div class="card"><p>${esc(BUDGET[p.budget])}</p></div>
+  </section>
+  <p class="disclaimer">Рекомендации сформированы по правилам и таблицам, а не нейросетью. Цветотип и тип фигуры приблизительны: точнее всего цвет проверяется драпировкой тканей при дневном свете.</p>`;
+  $('#result').hidden=false;
+  updateShop();
+  $('#result').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
+}
+function updateShop(){
+  const cap=state.capsule, have=state.have;
+  const need=cap.filter(i=>!have.has(i.id));
+  $('#shopList').innerHTML=need.length?need.map(i=>`<li><i style="background:${i.color}"></i>${esc(i.name)} — ${esc(i.colorName)}</li>`).join(''):'<li>Всё уже есть в гардеробе 🎉</li>';
+  const pct=Math.round(have.size/cap.length*100);
+  $('#progBar').style.width=pct+'%';
+  $('#progTxt').textContent=`Уже есть: ${have.size} из ${cap.length} (${pct}%)`;
+  cap.forEach(i=>$('#item'+i.id).classList.toggle('have',have.has(i.id)));
+}
+$('#result').addEventListener('change',e=>{
+  const id=e.target.dataset&&e.target.dataset.have; if(id===undefined) return;
+  e.target.checked?state.have.add(+id):state.have.delete(+id); updateShop();
+});
+$('#result').addEventListener('click',async e=>{
+  const sw=e.target.closest('.sw');
+  if(sw){try{await navigator.clipboard.writeText(sw.dataset.hex);const s=sw.querySelector('small');const o=s.textContent;s.textContent='Скопировано';setTimeout(()=>s.textContent=o,1200)}catch(_){}return}
+  if(e.target.id==='copyShop'){
+    const t='Список покупок:\n'+state.capsule.filter(i=>!state.have.has(i.id)).map(i=>`• ${i.name} — ${i.colorName}`).join('\n');
+    try{await navigator.clipboard.writeText(t);$('#copyMsg').textContent='Список скопирован.'}catch(_){$('#copyMsg').textContent='Не удалось скопировать — выделите текст вручную.'}
+  }
+  if(e.target.id==='again'){$('#form').scrollIntoView({behavior:'smooth'})}
+});
+
+/* ---------- ОТПРАВКА ФОРМЫ ---------- */
+$('#form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=n=>($(`input[name=${n}]:checked`)||{}).value;
+  const err=$('#formErr');
+  if(!v('gender')){err.textContent='Шаг 1: выберите, для кого подбираем капсулу.';$('#step1').scrollIntoView();return}
+  if(!v('fig')){err.textContent='Шаг 2: выберите тип фигуры или определите его по меркам.';$('#step2').scrollIntoView();return}
+  if(!v('ct')){err.textContent='Шаг 3: выберите цветотип или пройдите мини-тест.';$('#step3').scrollIntoView();return}
+  err.textContent='';
+  const occ=$$('input[name=occ]:checked').map(i=>i.value);
+  const h=+$('#height').value;
+  render({
+    gender:v('gender'),fig:v('fig'),ct:v('ct'),
+    height:(h>=120&&h<=220)?h:0,
+    styles:$$('input[name=style]:checked').map(i=>i.value),
+    occ:occ.length?occ:['w','c'],
+    climate:$('#climate').value,budget:+$('#budget').value,size:+$('#size').value
+  });
+});
+</script>
+</body>
+</html>
